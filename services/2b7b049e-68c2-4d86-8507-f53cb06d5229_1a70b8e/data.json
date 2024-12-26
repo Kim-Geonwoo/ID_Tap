@@ -1,0 +1,42 @@
+{
+    "items": [
+        {
+            "icon": "phone",
+            "id": "6",
+            "link": "010-1234-5678",
+            "title": "전화하기",
+            "type": "tel"
+        },
+        {
+            "description": "kgw@geonwoo.dev",
+            "icon": "envelope",
+            "id": "2",
+            "link": "kgw@geonwoo.dev",
+            "title": "이메일",
+            "type": "email"
+        },
+        {
+            "icon": "youtube",
+            "id": "3",
+            "link": "https://www.kakao.com/",
+            "title": "유튜브",
+            "type": "link"
+        },
+        {
+            "icon": "comment",
+            "id": "7",
+            "link": "010-1234-5678",
+            "title": "문자 메시지 보내기",
+            "type": "sms"
+        },
+        {
+            "content": [
+                "안녕하세요. 사용자님!",
+                "이 웹명함은 누구나 간편하게 ",
+                "생성할 수 있는 아이디탭 입니다!"
+            ],
+            "id": "8",
+            "type": "description"
+        }
+    ]
+}

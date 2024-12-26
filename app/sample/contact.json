@@ -1,0 +1,18 @@
+{
+    "address": "대한민국",
+    "birthday": "2000-01-01",
+    "company": "지금 회사",
+    "email": {
+        "home": "kgw@geonwoo.dev",
+        "work": "kgw@geonwoo.dev"
+    },
+    "fn": "홍길동",
+    "position": "풀스택 개발자",
+    "socialProfiles": {
+        "applemusic": "https://google.com",
+        "instagram": "https://google.com",
+        "spotify": "https://google.com"
+    },
+    "tel": "010-1234-5678",
+    "url": "https://google.com"
+}

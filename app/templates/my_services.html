@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <!-- 메모 : service-card의 css스타일을 flex-direction: column에서 flex-direction: row로 적용한거 고려해보자. 가독성 좋은데? -->
+    <script src="https://kit.fontawesome.com/8867becc4c.js" crossorigin="anonymous"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>아이디탭 - 나의 서비스</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f0f2f5;
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .page-title {
+            color: #2c3e50;
+            font-size: 2rem;
+        }
+
+        .add-service-btn {
+            background-color: #3498db;
+            color: white;
+            padding: 10px 15px;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+
+        .add-service-btn:hover {
+            background-color: #2980b9;
+        }
+
+        .flash-messages {
+            margin-bottom: 20px;
+        }
+
+        .flash-message {
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+
+        .flash-message.success {
+            background-color: #2ecc71;
+            color: white;
+        }
+
+        .flash-message.error {
+            background-color: #e74c3c;
+            color: white;
+        }
+
+        .services-grid {
+            display: flex;
+            gap: 20px;
+            padding: 20px;
+            flex-wrap: wrap;
+        }
+
+        .service-card {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            overflow: hidden;
+            transition: transform 0.3s;
+            display: flex;
+            flex-direction: column;
+            height: 440px;
+            width: 400px;
+        }
+
+        .service-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .service-header {
+            background-color: #3498db;
+            color: white;
+            padding: 15px;
+            text-align: center;
+        }
+
+        .service-body {
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+        }
+
+
+        .service-actions {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 15px;
+        }
+
+        .btn {
+            padding: 8px 12px;
+            border-radius: 4px;
+            text-decoration: none;
+            cursor: pointer;
+            transition: opacity 0.3s;
+        }
+
+        .edit-btn {
+            background-color: #2ecc71;
+            color: white;
+        }
+        
+        .deploy-buttons {
+            color: white;
+            margin-top: 5px;
+        }
+
+        .text-muted {
+            color:#495057
+        }
+
+        .delete-btn {
+            background-color: #e74c3c;
+            color: white;
+        }
+
+        .btn:hover {
+            opacity: 0.8;
+        }
+
+        .service-footer {
+            background-color: #f1f3f5;
+            padding: 10px;
+            text-align: right;
+            font-size: 0.8rem;
+            color: #6c757d;
+            margin-top: auto; /* 하단에 배치 */
+        }
+
+        .no-services {
+            text-align: center;
+            color: #6c757d;
+            margin-top: 50px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 10% auto;
+            padding: 20px;
+            border-radius: 8px;
+            width: 80%;
+            max-width: 500px;
+        }
+
+        .modal-close {
+            float: right;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .share-btn {
+            background-color: #6c757d;
+            color: white;
+        }
+
+        .share-btn:hover {
+            background-color: #495057;
+        }
+</style>
+<!-- 서비스 사용량 제한관련 스타일코드 -->
+<style>
+    .service-limit-info {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        background-color: #f8f9fa;
+        padding: 10px;
+        border-radius: 5px;
+    }
+
+    .service-limit-info p {
+        margin: 0;
+        color: #6c757d;
+    }
+
+    .service-limit-warning {
+        background-color: #f8d7da;
+        color: #721c24;
+        padding: 15px;
+        border-radius: 5px;
+        margin-bottom: 15px;
+    }
+
+    .add-service-btn:disabled {
+        background-color: #6c757d;
+        cursor: not-allowed;
+    }
+
+    #serviceModal .modal-content {
+        position: relative;
+        max-width: 500px;
+        margin: 10% auto;
+        background-color: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+
+    #serviceModal .modal-close {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        font-size: 24px;
+        cursor: pointer;
+    }
+
+    #serviceModal form div {
+        margin-bottom: 15px;
+    }
+
+    #serviceModal label {
+        display: block;
+        margin-bottom: 5px;
+    }
+
+    #serviceModal input[type="text"],
+    #serviceModal textarea {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+    }
+
+    #serviceModal button[type="submit"] {
+        width: 100%;
+        padding: 10px;
+        background-color: #3498db;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+
+    #serviceModal button[type="submit"]:disabled {
+        background-color: #6c757d;
+        cursor: not-allowed;
+    }
+</style>
+<!-- 서비스 버튼 요청시 로딩스타일 추가 -->
+<style>
+    /* 로딩 스피너 스타일 추가 */
+    .loading-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+    }
+
+    .loading-spinner {
+        width: 50px;
+        height: 50px;
+        border: 5px solid #f3f3f3;
+        border-top: 5px solid #3498db;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    /* 버튼 로딩 상태 스타일 */
+    .btn.loading {
+        position: relative;
+        color: transparent !important;
+        pointer-events: none;
+    }
+
+    .btn.loading::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 20px;
+        height: 20px;
+        border: 3px solid #f3f3f3;
+        border-top: 3px solid #3498db;
+        border-radius: 50%;
+        transform: translate(-50%, -50%);
+        animation: spin 1s linear infinite;
+    }
+</style>
+<style>
+    .dashboard-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 8px 0;
+        background-color: #ffffff;
+    }
+
+    .dashboard-back-button {
+        text-decoration: none;
+        color: #3498db;
+        padding: 5px 10px;
+        border-radius: 4px;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 13px;
+        transition: all 0.2s ease;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    .dashboard-back-button:hover {
+        background-color: #f1f3f5;
+        transform: translateY(-1px);
+    }
+</style>
+</head>
+<body>
+    
+    <!-- 로딩 오버레이 추가 -->
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="loading-spinner"></div>
+    </div>
+  <div class="container">
+      <!-- 페이지 헤더 부분에 서비스 제한 정보 추가 -->
+        <div class="page-header">
+            <h1 class="page-title">나의 서비스</h1>
+            
+            <!-- 서비스 제한 정보 추가 -->
+            <div class="service-limit-info">
+                <p>
+                    월간 서비스 생성 잔여량: 
+                    {{ 10 - (current_user.monthly_service_count or 0) }}/10 
+                    | 
+                    현재 활성된 서비스: 
+                    {{ (current_user.current_active_services or 0) }}/3
+                    |
+                    월간 서비스 배포 잔여량: 
+                    {{ 10 - (current_user.monthly_deploy_count or 0) }}/10
+                    |
+                    현재 배포된 서비스: 
+                    {{ (current_user.current_active_deploys or 0) }}/3
+                </p>
+                
+                <!-- 서비스 생성/배포 제한 안내 버튼 -->
+                <button class="btn btn-info btn-sm" id="limitInfoBtn">
+                    <i class="fas fa-info-circle"></i> 제한 안내
+                </button>
+
+                <!-- 서비스 생성 버튼 (제한에 따라 비활성화) -->
+                {% if current_user.monthly_service_count < 10 and current_user.current_active_services < 3 %}
+                    <a href="#" class="add-service-btn" id="openModalBtn">새로운 서비스 생성</a>
+                {% else %}
+                    <button class="add-service-btn" disabled title="서비스 생성 제한">서비스 생성한도 초과</button>
+                {% endif %}
+            </div>
+        </div>
+
+      {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+              <div class="flash-messages">
+                  {% for category, message in messages %}
+                      <div class="flash-message {{ category }}">{{ message }}</div>
+                  {% endfor %}
+              </div>
+          {% endif %}
+      {% endwith %}
+
+      <div class="services-grid">
+        {% for service in services %}
+            <div class="service-card" data-service-uuid="{{ service.uuid }}">
+                <div class="service-header">
+                    <h2>{{ service.name }}</h2>
+                </div>
+                <div class="service-body">
+                    <p>{{ service.description }}</p>
+                    <div class="service-actions">
+                        <a href="{{ url_for('main.edit_service', service_uuid=service.uuid) }}" class="btn edit-btn">Edit</a>
+                        
+                        <form action="{{ url_for('main.delete_service', service_uuid=service.uuid) }}" method="POST">
+                            <button type="submit" class="btn delete-btn" onclick="return confirm('정말 삭제하시겠습니까?')">Delete</button>
+                        </form>
+                    </div>
+                    
+                    <div class="deploy-buttons">
+                        <!-- 배포 버튼 (서비스가 배포되지 않은 경우에만 표시) -->
+                        {% if not service.is_deployed %}
+                        <form action="{{ url_for('main.deploy_service', service_uuid=service.uuid) }}" method="POST">
+                            <button 
+                                type="submit" 
+                                class="btn btn-primary deploy-btn"
+                                {% if 
+                                    current_user.monthly_deploy_count >= 10 or 
+                                    current_user.current_active_deploys >= 3
+                                %}
+                                    disabled
+                                    title="배포 한도에 도달했습니다"
+                                {% endif %}
+                            >
+                                Deploy 
+                                {% if current_user.monthly_deploy_count >= 10 %}
+                                    <span class="badge badge-danger">월간 한도 초과</span>
+                                {% endif %}
+                                
+                                {% if current_user.current_active_deploys >= 3 %}
+                                    <span class="badge badge-danger">활성 배포 한도 초과</span>
+                                {% endif %}
+                            </button>
+                        </form>
+                        {% endif %}
+                    
+                        <!-- 배포 취소 버튼 (서비스가 배포된 경우에만 표시) -->
+                        {% if service.is_deployed %}
+                        <form action="{{ url_for('main.delete_deploy', service_uuid=service.uuid) }}" method="POST" class="d-inline">
+                            <button 
+                                type="submit" 
+                                class="btn btn-danger delete-deploy-btn"
+                                onclick="return confirm('정말로 배포를 취소하시겠습니까?');"
+                                {% if current_user.monthly_deploy_count >= 20 %}
+                                    disabled
+                                    title="월간 배포 취소 한도 초과"
+                                {% endif %}
+                            >
+                                배포 취소
+                                {% if current_user.monthly_deploy_count >= 20 %}
+                                    <span class="badge badge-warning">취소 한도 초과</span>
+                                {% endif %}
+                            </button>
+                        </form>
+                    
+                        <!-- 배포 정보 추가 -->
+                        <div class="deploy-info">
+                            <small class="text-muted">
+                                배포일: {{ service.deployed_at.strftime('%Y-%m-%d %H:%M') }}
+                            </small>
+                        </div>
+                        {% endif %}
+                    </div>
+    
+                    <div class="mb-1">
+                        <label class="form-label">공개 URL (클릭시 복사)</label>
+                        <div class="input-group">
+                            <input type="text" id="public-url-{{ service.uuid }}" class="form-control" style="width: fit-content;" value="" readonly onclick="copyToClipboard('public-url-{{ service.uuid }}')">
+                        </div>
+                    </div>
+                    <div class="mb-1">
+                        <label class="form-label">미리보기</label>
+                        <div class="d-grid">
+                            <a href="" data-preview-link-{{ service.uuid }} target="_blank" class="btn btn-primary">
+                                <i class="fa-solid fa-eye"></i> 새 창으로 열기
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="service-footer">
+                    생성일: {{ service.created_at.strftime('%Y-%m-%d') }}
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+    
+    {% if services|length == 0 %}
+        <div class="no-services">
+            <p>아직 생성된 서비스가 없습니다.</p>
+        </div>
+    {% endif %}
+
+
+
+    <!-- 서비스 생성 모달 추가 -->
+    <div id="serviceModal" class="modal">
+        <div class="modal-content">
+            <span class="modal-close" id="closeModalBtn">&times;</span>
+            <h2>새 서비스 생성</h2>
+            
+            <!-- 서비스 제한 안내 메시지 -->
+            <div class="service-limit-warning">
+                <p>
+                    <strong>서비스 생성 제한 안내</strong>
+                    <br>
+                    - 월간 최대 10개 서비스 생성 가능
+                    <br>
+                    - 최대 3개의 활성 서비스 유지 가능
+                </p>
+                <p>
+                    <strong>현재 상태:</strong> <br />
+                    월간 서비스 생성 잔여량 {{ 10 - (current_user.monthly_service_count or 0) }}번, <br />
+                    활성 서비스 {{ current_user.current_active_services }}개
+                </p>
+            </div>
+
+            <form action="{{ url_for('main.my_services') }}" method="POST">
+                <div>
+                    <label for="name">서비스 이름</label>
+                    <input type="text" id="name" name="name" required>
+                </div>
+                <div>
+                    <label for="description">설명</label>
+                    <textarea id="description" name="description"></textarea>
+                </div>
+                <button type="submit" 
+                        {% if current_user.monthly_service_count >= 10 or current_user.current_active_services >= 3 %}
+                            disabled
+                        {% endif %}>
+                    생성
+                </button>
+            </form>
+        </div>
+    </div>
+
+  <!-- 서비스 제한 안내 모달 -->
+    <div class="modal" id="limitInfoModal">
+        <div class="modal-content">
+            <span class="modal-close" id="closeLimitModalBtn">&times;</span>
+            <h2>서비스 생성 및 배포 제한 안내</h2>
+            
+            <div class="service-limit-warning">
+                <h3>현재 사용 잔여량</h3>
+                <ul>
+                    <li>
+                        월간 서비스 생성: 
+                        <strong>{{ 10 - (current_user.monthly_service_count or 0) }}번</strong>
+                    </li>
+                    <li>
+                        월간 배포: 
+                        <strong>{{ 10 -current_user.monthly_deploy_count or 0 }}번</strong>
+                    </li>
+                </ul>
+                <br />
+                <h3>현재 서비스 현황</h3>
+                <ul>
+                    <li>
+                        활성 서비스: 
+                        <strong>{{ current_user.current_active_services or 0 }}/3</strong>
+                    </li>
+                    <li>
+                        활성 배포: 
+                        <strong>{{ current_user.current_active_deploys or 0 }}/3</strong>
+                    </li>
+                </ul>
+                
+            </div>
+
+            <div class="limit-details">
+                <h3>제한 규정</h3>
+                <ul>
+                    <li>! 월 최대 10개 서비스 생성 및 배포가능</li>
+                    <li>! 최대 3개의 활성 서비스 유지 및 서비스 배포 사용가능</li>
+                    <li>*매월 1일 카운트 초기화</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="dashboard-back-link">
+        <a href="{{ url_for('main.dashboard') }}" class="dashboard-back-button">
+            <i class="fas fa-home"></i>
+            대시보드로 돌아가기
+        </a>
+    </div>
+  
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const serviceModal = document.getElementById('serviceModal');
+        const openModalBtn = document.getElementById('openModalBtn');
+        const closeModalBtn = document.getElementById('closeModalBtn');
+
+        // 모달 열기
+        openModalBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            serviceModal.style.display = 'block';
+        });
+
+        // 모달 닫기 (X 버튼)
+        closeModalBtn.addEventListener('click', () => {
+            serviceModal.style.display = 'none';
+        });
+
+        // 모달 외부 클릭 시 닫기
+        window.addEventListener('click', (e) => {
+            if (e.target === serviceModal) {
+                serviceModal.style.display = 'none';
+            }
+        });
+    });
+</script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // 각 서비스에 대해 URL 가져오기
+        const serviceCards = document.querySelectorAll('.service-card');
+        
+        serviceCards.forEach(card => {
+            const serviceUuid = card.dataset.serviceUuid;
+            const publicUrlInput = card.querySelector(`#public-url-${serviceUuid}`);
+            const previewLink = card.querySelector(`[data-preview-link-${serviceUuid}]`);
+
+            async function fetchServiceUrls() {
+                if (!serviceUuid) {
+                    console.error('서비스 UUID가 없습니다.');
+                    return;
+                }
+
+                try {
+                    const response = await fetch(`/get_service_url/${serviceUuid}`, {
+                        method: 'GET',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    });
+
+                    const data = await response.json();
+
+                    if (data.success) {
+                        if (publicUrlInput) publicUrlInput.value = data.public_url;
+                        if (previewLink) previewLink.href = data.preview_url;
+                    } else {
+                        console.error('URL 가져오기 실패:', data.message);
+                    }
+                } catch (error) {
+                    console.error('URL 요청 중 오류:', error);
+                }
+            }
+
+            // URL 가져오기
+            fetchServiceUrls();
+        });
+    
+        function copyToClipboard(elementId) {
+            const copyText = document.getElementById(elementId);
+            copyText.select();
+            copyText.setSelectionRange(0, 99999); // 모바일 지원
+    
+            navigator.clipboard.writeText(copyText.value).then(() => {
+                alert('링크가 복사되었습니다.');
+            }).catch(err => {
+                console.error('복사 실패:', err);
+                alert('링크 복사에 실패했습니다.');
+            });
+        }
+    
+        function shareViaEmail(publicUrl) {
+            const subject = encodeURIComponent('내 프로필 링크 공유');
+            const body = encodeURIComponent(publicUrl);
+            window.location.href = `mailto:?subject=${subject}&body=${body}`;
+        }
+    
+        function shareViaWhatsApp(publicUrl) {
+            const text = encodeURIComponent(`내 프로필을 확인해보세요: ${publicUrl}`);
+            window.open(`https://wa.me/?text=${text}`, '_blank');
+        }
+    
+        // 전역 함수 설정
+        window.copyToClipboard = copyToClipboard;
+        window.shareViaEmail = shareViaEmail;
+        window.shareViaWhatsApp = shareViaWhatsApp;
+    });
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 제한 안내 모달 관리
+            const limitInfoModal = document.getElementById('limitInfoModal');
+            const limitInfoBtn = document.getElementById('limitInfoBtn');
+            const closeLimitModalBtn = document.getElementById('closeLimitModalBtn');
+        
+            limitInfoBtn.addEventListener('click', () => {
+                limitInfoModal.style.display = 'block';
+            });
+        
+            closeLimitModalBtn.addEventListener('click', () => {
+                limitInfoModal.style.display = 'none';
+            });
+        
+            window.addEventListener('click', (e) => {
+                if (e.target === limitInfoModal) {
+                    limitInfoModal.style.display = 'none';
+                }
+            });
+        
+            // 배포 버튼 상태 관리
+            const deployButtons = document.querySelectorAll('.deploy-btn');
+            const deleteDeployButtons = document.querySelectorAll('.delete-deploy-btn');
+        
+            deployButtons.forEach(btn => {
+                if (btn.hasAttribute('disabled')) {
+                    btn.classList.add('btn-secondary');
+                    btn.classList.remove('btn-primary');
+                }
+            });
+        
+            deleteDeployButtons.forEach(btn => {
+                if (btn.hasAttribute('disabled')) {
+                    btn.classList.add('btn-outline-secondary');
+                    btn.classList.remove('btn-danger');
+                }
+            });
+        });
+    </script>
+    <!-- 서비스 버튼 요청시 로딩관련 스크립트 추가 -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const loadingOverlay = document.getElementById('loadingOverlay');
+        
+            // 모든 폼에 대한 로딩 처리
+            const forms = document.querySelectorAll('form');
+            forms.forEach(form => {
+                form.addEventListener('submit', function(e) {
+                    // 이미 로딩 중이면 중복 제출 방지
+                    if (this.classList.contains('loading')) {
+                        e.preventDefault();
+                        return;
+                    }
+        
+                    // 제출 버튼 로딩 상태로 변경
+                    const submitButton = this.querySelector('button[type="submit"]');
+                    if (submitButton) {
+                        submitButton.classList.add('loading');
+                    }
+        
+                    // 로딩 오버레이 표시
+                    loadingOverlay.style.display = 'flex';
+        
+                    // 타임아웃 설정 (네트워크 오류 대비)
+                    setTimeout(() => {
+                        loadingOverlay.style.display = 'none';
+                        if (submitButton) {
+                            submitButton.classList.remove('loading');
+                        }
+                    }, 30000); // 30초 후 로딩 해제
+                });
+            });
+        
+            // 서비스 생성 모달 폼 추가 로딩 처리
+            const serviceModal = document.getElementById('serviceModal');
+            if (serviceModal) {
+                const serviceForm = serviceModal.querySelector('form');
+                if (serviceForm) {
+                    serviceForm.addEventListener('submit', function(e) {
+                        // 이미 로딩 중이면 중복 제출 방지
+                        if (this.classList.contains('loading')) {
+                            e.preventDefault();
+                            return;
+                        }
+        
+                        // 제출 버튼 로딩 상태로 변경
+                        const submitButton = this.querySelector('button[type="submit"]');
+                        if (submitButton) {
+                            submitButton.classList.add('loading');
+                        }
+        
+                        // 로딩 오버레이 표시
+                        loadingOverlay.style.display = 'flex';
+        
+                        // 타임아웃 설정 (네트워크 오류 대비)
+                        setTimeout(() => {
+                            loadingOverlay.style.display = 'none';
+                            if (submitButton) {
+                                submitButton.classList.remove('loading');
+                            }
+                        }, 30000); // 30초 후 로딩 해제
+                    });
+                }
+            }
+        
+            // AJAX 요청 시 글로벌 로딩 처리
+            const originalFetch = window.fetch;
+            window.fetch = function() {
+                loadingOverlay.style.display = 'flex';
+                return originalFetch.apply(this, arguments)
+                    .finally(() => {
+                        loadingOverlay.style.display = 'none';
+                    });
+            };
+        });
+    </script>
+</body>
+</html>

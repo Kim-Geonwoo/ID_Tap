@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>아이디탭 - 프로필 수정</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/preline@2.6.0/dist/preline.min.js"></script>
+    <style>
+        .flash-message {
+            color: red;
+        }
+    </style>
+    <script>
+        function previewImage(event) {
+            const file = event.target.files[0];
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const imgPreview = document.getElementById('imgPreview');
+                imgPreview.src = e.target.result;
+                imgPreview.style.display = 'block';
+            }
+            reader.readAsDataURL(file);
+        }
+    </script>
+</head>
+<header class="relative flex flex-wrap sm:justify-start sm:flex-nowrap w-full bg-slate-50 text-sm py-3 dark:bg-neutral-500">
+    <nav class="max-w-[85rem] w-full mx-auto px-4 sm:flex sm:items-center sm:justify-between">
+        <div class="flex items-center justify-between">
+            <a class="flex-none text-slate-100 font-semibold dark:text-white focus:outline-none focus:opacity-80" href="#" aria-label="Brand">
+            <span class="inline-flex items-center text-black gap-x-2 text-xl font-semibold dark:text-white">
+                <img class="w-10 h-auto" src="../static/assets/img/web-icon.png" alt="Logo">
+                아이디탭
+            </span>
+            </a>
+            <div class="sm:hidden">
+            <button type="button" class="hs-collapse-toggle relative size-7 flex justify-center items-center gap-x-2 rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-transparent dark:border-neutral-700 dark:text-white dark:hover:bg-white/10 dark:focus:bg-white/10" id="hs-navbar-example-collapse" aria-expanded="false" aria-controls="hs-navbar-example" aria-label="Toggle navigation" data-hs-collapse="#hs-navbar-example">
+                <svg class="hs-collapse-open:hidden shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" x2="21" y1="6" y2="6"/><line x1="3" x2="21" y1="12" y2="12"/><line x1="3" x2="21" y1="18" y2="18"/></svg>
+                <svg class="hs-collapse-open:block hidden shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                <span class="sr-only">내비게이션바 활성화</span>
+            </button>
+            </div>
+        </div>
+        {% if current_user.is_authenticated %}
+        <div id="hs-navbar-example" class="hidden hs-collapse overflow-hidden transition-all duration-300 basis-full grow sm:block" aria-labelledby="hs-navbar-example-collapse">
+            <div class="flex flex-col gap-5 mt-5 sm:flex-row sm:items-center sm:justify-end sm:mt-0 sm:ps-5">
+            <a class="font-medium text-blue-500 focus:outline-none" href="{{ url_for('main.user_detail', user_id=current_user.id) }}" aria-current="page">프로필</a>
+            <a class="font-medium text-gray-600 hover:text-gray-400 focus:outline-none focus:text-gray-400 dark:text-neutral-400 dark:hover:text-neutral-500 dark:focus:text-neutral-500" href="{{ url_for('main.dashboard') }}">대시보드</a>
+            <a class="font-medium text-gray-600 hover:text-gray-400 focus:outline-none focus:text-gray-400 dark:text-neutral-400 dark:hover:text-neutral-500 dark:focus:text-neutral-500" href="{{ url_for('main.my_services') }}">나의 서비스</a>
+            <a class="font-medium text-gray-600 hover:text-gray-400 focus:outline-none focus:text-gray-400 dark:text-neutral-400 dark:hover:text-neutral-500 dark:focus:text-neutral-500" href="{{ url_for('main.index') }}">메인화면</a>
+            </div>
+        </div>
+        {% else %}
+        <div id="hs-navbar-example" class="hidden hs-collapse overflow-hidden transition-all duration-300 basis-full grow sm:block" aria-labelledby="hs-navbar-example-collapse">
+            <div class="flex flex-col gap-5 mt-5 sm:flex-row sm:items-center sm:justify-end sm:mt-0 sm:ps-5">
+                <a class="font-medium text-blue-500 focus:outline-none" href="{{ url_for('main.login') }}" aria-current="page">로그인</a>
+                <a class="font-medium text-gray-600 hover:text-gray-400 focus:outline-none focus:text-gray-400 dark:text-neutral-400 dark:hover:text-neutral-500 dark:focus:text-neutral-500" href="{{ url_for('main.register_user') }}">회원가입</a>
+                <a class="font-medium text-gray-600 hover:text-gray-400 focus:outline-none focus:text-gray-400 dark:text-neutral-400 dark:hover:text-neutral-500 dark:focus:text-neutral-500" href="{{ url_for('main.index') }}">메인화면</a>
+            </div>
+        </div>
+        {% endif %}
+    </nav>
+</header>
+<body class="bg-gray-100 items-center justify-center min-h-screen ">
+    <div class="max-w-[30rem] items-center justify-center rounded-lg py-8 px-10 w-full mx-auto">
+        <div class="container mx-auto mt-6 p-5 bg-white rounded shadow">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <div class="mb-4">
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ category }} bg-{{ category }}-100 border border-{{ category }}-400 text-{{ category }}-700 px-4 py-3 rounded relative" role="alert">
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
+            <div class="flex flex-col items-center">
+                <h1 class="text-2xl font-bold mb-4">사용자 프로필 수정</h1>
+    
+                <!-- 현재 프로필 이미지 프리뷰 -->
+                <strong>프로필 이미지</strong>
+                <div class="mb-4">
+                    <img id="imgPreview" alt="Profile Image" class="mt-2 w-32 h-32 rounded-full object-cover" style="display: block;" src="{{ url_for('main.get_profile_image', user_id=user.id) }}">
+                </div>
+    
+                <p><strong>사용자 닉네임:</strong> {{ user.username }}</p>
+                <p><strong>이메일:</strong> {{ user.email }}</p>
+                <p><strong>가입날짜:</strong> {{ user.created_at.strftime('%Y-%m-%d') }}</p>
+                <br>
+            </div>
+            
+    
+            
+            <div class="bg-gray-100 hover:bg-gray-200 rounded-lg transition p-1 dark:bg-neutral-700 dark:hover:bg-neutral-600">
+                <nav class="w-fit flex items-start bg-gray-100 hover:bg-gray-200 rounded-lg transition p-1 dark:bg-neutral-700 dark:hover:bg-neutral-600" aria-label="Tabs" role="tablist" aria-orientation="horizontal">
+                    <div class="mx-1 flex gap-x-1">
+                    <button type="button" class="hs-tab-active:bg-white hs-tab-active:text-gray-700 hs-tab-active:dark:bg-neutral-800 hs-tab-active:dark:text-neutral-400 dark:hs-tab-active:bg-gray-800 py-3 px-2 inline-flex items-center gap-x-2 bg-transparent text-sm text-gray-500 hover:text-gray-700 focus:outline-none focus:text-gray-700 font-medium rounded-lg hover:hover:text-blue-600 disabled:opacity-50 disabled:pointer-events-none dark:text-neutral-400 dark:hover:text-white dark:focus:text-white active" id="bar-with-underline-item-1" aria-selected="true" data-hs-tab="#bar-with-underline-1" aria-controls="bar-with-underline-1" role="tab">
+                      기본정보 수정
+                    </button>
+                    <button type="button" class="hs-tab-active:bg-white hs-tab-active:text-gray-700 hs-tab-active:dark:bg-neutral-800 hs-tab-active:dark:text-neutral-400 dark:hs-tab-active:bg-gray-800 py-3 px-2 inline-flex items-center gap-x-2 bg-transparent text-sm text-gray-500 hover:text-gray-700 focus:outline-none focus:text-gray-700 font-medium rounded-lg hover:hover:text-blue-600 disabled:opacity-50 disabled:pointer-events-none dark:text-neutral-400 dark:hover:text-white dark:focus:text-white" id="bar-with-underline-item-2" aria-selected="false" data-hs-tab="#bar-with-underline-2" aria-controls="bar-with-underline-2" role="tab">
+                      이메일 수정
+                    </button>
+                    </div>
+                  </nav>
+                  
+                  <div class="mx-4 mt-3">
+                    <div id="bar-with-underline-1" role="tabpanel" aria-labelledby="bar-with-underline-item-1">
+                      <!-- 프로필 업데이트 폼 -->
+                        <form method="POST" action="{{ url_for('main.user_detail', user_id=user.id) }}" enctype="multipart/form-data" class="mb-5">
+                            <div class="mb-4">
+                                <label for="username" class="block text-sm font-medium text-gray-700">사용자 닉네임:</label>
+                                <input type="text" id="username" name="username" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-500" value="{{ user.username }}">
+                            </div>
+                        
+                            <div class="mb-4">
+                                <label for="user_profileimg" class="block text-sm font-medium text-gray-700">프로필 이미지:</label>
+                                <input type="file" id="user_profileimg" name="user_profileimg" class="mt-1 block w-full text-sm text-gray-500 border border-gray-300 rounded-md focus:ring focus:ring-blue-500" accept="image/*" onchange="previewImage(event)">
+                            </div>
+        
+                            <div class="mb-4">
+                                <label for="email" class="block text-sm font-medium text-gray-700">현재 이메일:</label>
+                                <input type="email" id="email" name="email" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-500" value="{{ user.email }}" readonly>
+                            </div>
+        
+                            <div class="mb-4">
+                                <label for="password" class="block text-sm font-medium text-gray-700">현재 비밀번호:</label>
+                                <input type="password" id="password" name="password" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-500" placeholder="프로필 변경을 위한 비밀번호 입력">
+                            </div>
+        
+                            <button type="submit" class="w-full bg-blue-500 text-white font-bold py-2 rounded hover:bg-blue-600">프로필 업데이트</button>
+                        </form>
+                    </div>
+                    <div id="bar-with-underline-2" class="hidden" role="tabpanel" aria-labelledby="bar-with-underline-item-2">
+                      <!-- 인증 코드 요청 폼 -->
+                        <form method="POST" action="{{ url_for('main.request_edit_verification', user_id=user.id) }}" class="mb-5">
+                            <div class="mb-4">
+                                <label for="email" class="block text-sm font-medium text-gray-700">현재 이메일:</label>
+                                <input type="email" id="email" name="email" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-500" value="{{ user.email }}" readonly>
+                            </div>
+        
+                            <div class="mb-4">
+                                <label for="new_email" class="block text-sm font-medium text-gray-700">새 이메일:</label>
+                                <input type="email" id="new_email" name="new_email" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-500" placeholder="새 이메일 입력">
+                            </div>
+        
+                            <div class="mb-4">
+                                <label for="email_password" class="block text-sm font-medium text-gray-700">현재 비밀번호:</label>
+                                <input type="password" id="email_password" name="email_password" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-500" placeholder="프로필 변경을 위한 비밀번호 입력">
+                            </div>
+        
+        
+                            <div class="mb-4">
+                                <label for="verification_code" class="block text-sm font-medium text-gray-700">인증 코드:</label>
+                                <input type="text" id="verification_code" name="verification_code" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-500" placeholder="인증 코드 입력">
+                            </div>
+        
+                            <button type="submit" class="w-full bg-green-500 text-white font-bold py-2 rounded hover:bg-green-600">인증 코드 요청</button>
+                        </form>
+                    </div>
+                  </div>
+            </div>
+            
+    
+            
+            
+            
+    
+            
+            <div class="text-center mt-4">
+                <a href="{{ url_for('main.index') }}" class="text-blue-500 hover:text-blue-700">메인으로</a>
+            </div>
+        </div>
+    </div>
+    
+</body>
+</html>

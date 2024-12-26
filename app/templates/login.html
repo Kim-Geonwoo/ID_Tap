@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>아이디탭 - 로그인</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/preline@2.6.0/dist/preline.min.js"></script>
+    <style>
+        .flash-message {
+            color: red;
+        }
+    </style>
+</head>
+<header class="relative flex flex-wrap sm:justify-start sm:flex-nowrap w-full text-sm py-3 dark:bg-neutral-500">
+    <nav class="max-w-[85rem] w-full mx-auto px-4 sm:flex sm:items-center sm:justify-between">
+        <div class="flex items-center justify-between">
+            <a class="flex-none text-slate-100 font-semibold dark:text-white focus:outline-none focus:opacity-80" href="#" aria-label="Brand">
+            <span class="inline-flex items-center text-black gap-x-2 text-xl font-semibold dark:text-white">
+                <img class="w-10 h-auto" src="../static/assets/img/web-icon.png" alt="Logo">
+                아이디탭
+            </span>
+            </a>
+            <div class="sm:hidden">
+            <button type="button" class="hs-collapse-toggle relative size-7 flex justify-center items-center gap-x-2 rounded-lg text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-transparent dark:border-neutral-700 dark:text-white" id="hs-navbar-example-collapse" aria-expanded="false" aria-controls="hs-navbar-example" aria-label="Toggle navigation" data-hs-collapse="#hs-navbar-example">
+                <svg class="hs-collapse-open:hidden shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" x2="21" y1="6" y2="6"/><line x1="3" x2="21" y1="12" y2="12"/><line x1="3" x2="21" y1="18" y2="18"/></svg>
+                <svg class="hs-collapse-open:block hidden shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                <span class="sr-only">내비게이션바 활성화</span>
+            </button>
+            </div>
+        </div>
+        {% if current_user.is_authenticated %}
+            <div id="hs-navbar-example" class="hidden hs-collapse overflow-hidden transition-all duration-300 basis-full grow sm:block" aria-labelledby="hs-navbar-example-collapse">
+                <div class="flex flex-col gap-5 mt-5 sm:flex-row sm:items-center sm:justify-end sm:mt-0 sm:ps-5">
+                <a class="font-medium text-blue-500 focus:outline-none" href="#" aria-current="page">프로필</a>
+                <a class="font-medium text-gray-600 hover:text-gray-400 focus:outline-none focus:text-gray-400 dark:text-neutral-400 dark:hover:text-neutral-500 dark:focus:text-neutral-500" href="{{ url_for('main.dashboard') }}">대시보드</a>
+                <a class="font-medium text-gray-600 hover:text-gray-400 focus:outline-none focus:text-gray-400 dark:text-neutral-400 dark:hover:text-neutral-500 dark:focus:text-neutral-500" href="{{ url_for('main.my_services') }}">나의 서비스</a>
+                <a class="font-medium text-gray-600 hover:text-gray-400 focus:outline-none focus:text-gray-400 dark:text-neutral-400 dark:hover:text-neutral-500 dark:focus:text-neutral-500" href="{{ url_for('main.index') }}">메인화면</a>
+                </div>
+            </div>
+            {% else %}
+            <div id="hs-navbar-example" class="hidden hs-collapse overflow-hidden transition-all duration-300 basis-full grow sm:block" aria-labelledby="hs-navbar-example-collapse">
+                <div class="flex flex-col gap-5 mt-5 sm:flex-row sm:items-center sm:justify-end sm:mt-0 sm:ps-5">
+                    <a class="font-medium text-blue-500 focus:outline-none" href="{{ url_for('main.login') }}" aria-current="page">로그인</a>
+                    <a class="font-medium text-gray-600 hover:text-gray-400 focus:outline-none focus:text-gray-400 dark:text-neutral-400 dark:hover:text-neutral-500 dark:focus:text-neutral-500" href="{{ url_for('main.register_user') }}">회원가입</a>
+                    <a class="font-medium text-gray-600 hover:text-gray-400 focus:outline-none focus:text-gray-400 dark:text-neutral-400 dark:hover:text-neutral-500 dark:focus:text-neutral-500" href="{{ url_for('main.index') }}">메인화면</a>
+                </div>
+            </div>
+        {% endif %}
+    </nav>
+</header>
+<body class="bg-gray-100 items-center justify-center min-h-screen mx-4">
+    <div class="max-w-[30rem] bg-white items-center justify-center shadow-md rounded-lg py-8 px-10 w-full mx-auto">
+        <h1 class="text-2xl font-bold text-center mb-6">로그인</h1>
+        
+        <!-- 플래시 메시지 섹션 -->
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="flash-message mb-4">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <form method="POST">
+            <div class="mb-4">
+                <label for="username" class="block text-gray-700 text-sm font-bold mb-2">사용자 닉네임:</label>
+                <input type="text" name="username" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+            </div>
+            <div class="mb-4">
+                <label for="password" class="block text-gray-700 text-sm font-bold mb-2">비밀번호:</label>
+                <input type="password" name="password" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                <a href="{{ url_for('main.forgot_password') }}" class="text-blue-500 hover:text-blue-700 text-sm">비밀번호 찾기</a>
+            </div>
+            <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded w-full">로그인</button>
+        </form>
+
+        <div class="text-center mt-4">
+            <a href="{{ url_for('main.index') }}" class="text-blue-500 hover:text-blue-700">메인으로</a>
+        </div>
+    </div>
+</body>
+</html>

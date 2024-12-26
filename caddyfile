@@ -1,0 +1,26 @@
+{
+	# 윈도우의 클라우드플레어 이메일 환경변수
+	email ${ClOUDFLARE_EMAIL}
+	# OCSP Stapling 비활성화
+	ocsp_stapling off
+}
+
+webcard.geonwoo.dev {
+	# 직접 tls 블록으로 이동
+	tls C:\nginx\ssl\cert.pem C:\nginx\ssl\key.pem
+
+	reverse_proxy localhost:5000
+	encode gzip
+
+	log {
+		output file C:/Users/admin/Documents/GitHub/web-profile-card__console/logs/access.log
+		format json
+	}
+
+	# 보안 헤더 추가 (옵션)
+	header {
+		X-XSS-Protection "1; mode=block"
+		X-Frame-Options "DENY"
+		X-Content-Type-Options "nosniff"
+	}
+}

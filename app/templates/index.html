@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>아이디 탭</title>
+    <script src="https://kit.fontawesome.com/8867becc4c.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/preline@2.6.0/dist/preline.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    animation: {
+                        'border': 'border 4s linear infinite',
+                    },
+                    keyframes: {
+                        'border': {
+                            to: { '--border-angle': '360deg' },
+                        }
+                    }                      
+                },
+            },
+        };
+    </script>
+    <style>
+        /* 이친구 때문에 밑에 코드가 못생겨졌지만,.... 이기능으로 만든게 이쁘니까 냅두기로 하자... */
+        @property --border-angle {
+            inherits: false;
+            initial-value: 0deg;
+            syntax: '<angle>';
+        }
+        /* 모달 스타일 */
+        .modal {
+            display: none; /* 기본적으로 숨김 */
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 500px;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body class="bg-white">
+    <header class="relative flex flex-wrap sm:justify-start sm:flex-nowrap w-full bg-slate-50 text-sm py-3 dark:bg-neutral-500">
+        <nav class="max-w-[85rem] w-full mx-auto px-4 sm:flex sm:items-center sm:justify-between">
+            <div class="flex items-center justify-between">
+                <a class="flex-none text-slate-100 font-semibold dark:text-white focus:outline-none focus:opacity-80" href="#" aria-label="Brand">
+                <span class="inline-flex items-center text-black gap-x-2 text-xl font-semibold dark:text-white">
+                    <img class="w-10 h-auto" src="../static/assets/img/web-icon.png" alt="Logo">
+                    아이디탭
+                </span>
+                </a>
+                <div class="sm:hidden">
+                <button type="button" class="hs-collapse-toggle relative size-7 flex justify-center items-center gap-x-2 rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-transparent dark:border-neutral-700 dark:text-white dark:hover:bg-white/10 dark:focus:bg-white/10" id="hs-navbar-example-collapse" aria-expanded="false" aria-controls="hs-navbar-example" aria-label="Toggle navigation" data-hs-collapse="#hs-navbar-example">
+                    <svg class="hs-collapse-open:hidden shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" x2="21" y1="6" y2="6"/><line x1="3" x2="21" y1="12" y2="12"/><line x1="3" x2="21" y1="18" y2="18"/></svg>
+                    <svg class="hs-collapse-open:block hidden shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                    <span class="sr-only">내비게이션바 활성화</span>
+                </button>
+                </div>
+            </div>
+            {% if current_user.is_authenticated %}
+            <div id="hs-navbar-example" class="hidden hs-collapse overflow-hidden transition-all duration-300 basis-full grow sm:block" aria-labelledby="hs-navbar-example-collapse">
+                <div class="flex flex-col gap-5 mt-5 sm:flex-row sm:items-center sm:justify-end sm:mt-0 sm:ps-5">
+                <a class="font-medium text-blue-500 focus:outline-none" href="{{ url_for('main.user_detail', user_id=current_user.id) }}" aria-current="page">프로필</a>
+                <a class="font-medium text-gray-600 hover:text-gray-400 focus:outline-none focus:text-gray-400 dark:text-neutral-400 dark:hover:text-neutral-500 dark:focus:text-neutral-500" href="{{ url_for('main.dashboard') }}">대시보드</a>
+                <a class="font-medium text-gray-600 hover:text-gray-400 focus:outline-none focus:text-gray-400 dark:text-neutral-400 dark:hover:text-neutral-500 dark:focus:text-neutral-500" href="{{ url_for('main.my_services') }}">나의 서비스</a>
+                <a class="font-medium text-gray-600 hover:text-gray-400 focus:outline-none focus:text-gray-400 dark:text-neutral-400 dark:hover:text-neutral-500 dark:focus:text-neutral-500" href="{{ url_for('main.index') }}">메인화면</a>
+                <a class="font-medium text-black hover:text-black focus:outline-none focus:text-black dark:text-black dark:hover:text-black dark:focus:text-black" href="{{ url_for('main.logout') }}">로그아웃</a>
+                
+                </div>
+            </div>
+            {% else %}
+            <div id="hs-navbar-example" class="hidden hs-collapse overflow-hidden transition-all duration-300 basis-full grow sm:block" aria-labelledby="hs-navbar-example-collapse">
+                <div class="flex flex-col gap-5 mt-5 sm:flex-row sm:items-center sm:justify-end sm:mt-0 sm:ps-5">
+                    <a class="font-medium text-blue-500 focus:outline-none" href="{{ url_for('main.login') }}" aria-current="page">로그인</a>
+                    <a class="font-medium text-gray-600 hover:text-gray-400 focus:outline-none focus:text-gray-400 dark:text-neutral-400 dark:hover:text-neutral-500 dark:focus:text-neutral-500" href="{{ url_for('main.register_user') }}">회원가입</a>
+                    <a class="font-medium text-gray-600 hover:text-gray-400 focus:outline-none focus:text-gray-400 dark:text-neutral-400 dark:hover:text-neutral-500 dark:focus:text-neutral-500" href="{{ url_for('main.index') }}">메인화면</a>
+                </div>
+            </div>
+            {% endif %}
+        </nav>
+    </header>
+    <div class="mx-4 mt-24 object-center rounded-lg">
+        <h1 class="tracking-tight text-3xl font-bold text-center mb-2">간단하게 만드는<br></h1>
+        <h1 class="tracking-wide text-3xl font-bold text-center mb-2">나만의 디지털 명함</h1>
+        <hr class="border-t-2 border-black my-1 w-64 mx-auto">
+        <h2 class="tracking-tighter text-3xl font-bold text-center mt-6 mb-8">아이디탭</h1>
+        
+        {% if current_user.is_authenticated %}
+        <div class="user-info w-80 flex-col justify-center mx-auto mb-5">
+            <article class="[background:linear-gradient(45deg,#ffffff,theme(colors.white)_50%,#ffffff)_padding-box,conic-gradient(from_var(--border-angle),theme(colors.slate.600/.48)_80%,_theme(colors.indigo.500)_86%,_theme(colors.indigo.300)_90%,_theme(colors.indigo.500)_94%,_theme(colors.slate.600/.48))_border-box] rounded-2xl border border-2 border-transparent animate-border p-4">
+                <div class="pt-2 flex justify-center">
+                    <img alt="Profile picture" class="rounded-full border-4 border-white" height="100" src="{{ url_for('main.get_profile_image', user_id=current_user.id) }}" width="100"/>
+                </div>
+                <div class="text-center mt-4">
+                    <h1 id="contact-name" class="text-2xl font-bold">{{ current_user.username }}</h1>
+                    {% if current_user.email_verified == false %}
+                    <div class="flex justify-center items-center mt-2">
+                        <span class="text-red-500 text-sm">●</span>
+                        <span class="text-red-500 text-sm ml-1">이메일 인증필요</span>
+                    </div>
+                    {% else %}
+                    <div class="flex justify-center items-center mt-2">
+                        <span class="text-green-500 text-sm">●</span>
+                        <span class="text-green-500 text-sm ml-1">{{ current_user.user_title }}</span>
+                    </div>
+                    {% endif %}
+                    
+                </div>
+                <h3 class="text-center text-gray-600 mt-6 mb-4">링크 바로가기</h3>
+                <div class="space-y-4">
+                    <div class="card bg-gray-200 rounded-lg shadow-md p-2 flex items-center justify-center">
+                        <a href="mailto:{{ current_user.email }}" class="flex items-center justify-center w-full text-gray-700" target="_blank" rel="noopener noreferrer">
+                            <i class="fa-solid fa-envelope mr-2"></i>
+                            {{ current_user.email }}
+                        </a>
+                    </div>
+                    <div class="card bg-gray-200 rounded-lg shadow-md p-2 flex items-center justify-center">
+                        <a href="https://kakao.com" class="flex items-center justify-center w-full text-gray-700" target="_blank" rel="noopener noreferrer">
+                            <i class="fa-solid fa-comment mr-2"></i>
+                            KAKAO
+                        </a>
+                    </div>
+                    <div class="card bg-gray-200 rounded-lg shadow-md p-2 flex items-center justify-center">
+                        <a href="https://apple.com" class="flex items-center justify-center w-full text-gray-700" target="_blank" rel="noopener noreferrer">
+                            <i class="fa-brands fa-apple mr-2"></i>
+                            APPLE
+                        </a>
+                    </div>
+                    <div class="card bg-gray-200 rounded-lg shadow-md p-2 flex items-center justify-center">
+                        <a href="https://google.com" class="flex items-center justify-center w-full text-gray-700" target="_blank" rel="noopener noreferrer">
+                            <i class="fa-brands fa-google mr-2"></i>
+                            GOOGLE
+                        </a>
+                    </div>
+                    <div class="mt-6 bg-gray-200 p-2 rounded-lg text-center">
+                        <p>반가워요! <strong>{{ current_user.username }}</strong>님!!<br> 항상 디지털 명함 - 아이디탭을 <br> 사용해주셔서 감사합니다!</p>
+                    </div>
+                    <div class="mt-6 bg-gray-200 p-2 rounded-lg text-center">
+                            <h2 class="text-black text-2xl font-semibold">사용자 정보</h2>
+                            <p class="mt-2"><strong>사용자 닉네임:</strong> {{ current_user.username }}</p>
+                            <p><strong>이메일:</strong> {{ current_user.email }}</p>
+                            <p><strong>가입날짜:</strong> {{ current_user.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</p>
+                            <p><strong>사용자 상태:</strong> {{ current_user.user_title }}</p>
+
+                    {% if current_user.email_verified == false %}
+                        <p class="text-red-500 mt-2">이메일 인증을 먼저 해주세요.</p>
+                    {% endif %}
+                    
+                    </div>
+
+                </div>
+
+            </article>
+            
+        </div>
+        {% else %}
+        <p class="text-center text-red-500">먼저 로그인을 해주세요.</p>
+        <div class="user-info w-80 flex-col justify-center mx-auto mb-5">
+            <article class="[background:linear-gradient(45deg,#ffffff,theme(colors.white)_50%,#ffffff)_padding-box,conic-gradient(from_var(--border-angle),theme(colors.slate.600/.48)_80%,_theme(colors.indigo.500)_86%,_theme(colors.indigo.300)_90%,_theme(colors.indigo.500)_94%,_theme(colors.slate.600/.48))_border-box] rounded-2xl border border-2 border-transparent animate-border p-4">
+                <div class="pt-2 flex justify-center">
+                    <img alt="Profile picture" class="rounded-full border-4 border-white" height="100" src="../static/assets/img/web-icon.png" width="100"/>
+                </div>
+                <div class="text-center mt-4">
+                    <h1 id="contact-name" class="text-2xl font-bold">게스트</h1>
+                    <div class="flex justify-center items-center mt-2">
+                        <span class="text-red-500 text-sm">●</span>
+                        <span class="text-red-500 text-sm ml-1">로그인 필요</span>
+                    </div>
+                    
+                </div>
+                <h3 class="text-center text-gray-600 mt-6 mb-4">링크 바로가기</h3>
+                <div class="space-y-4">
+                    <div class="card bg-gray-200 rounded-lg shadow-md p-2 flex items-center justify-center">
+                        <a href="mailto:kgw@geonwoo.dev" class="flex items-center justify-center w-full text-gray-700" target="_blank" rel="noopener noreferrer">
+                            <i class="fa-solid fa-envelope mr-2"></i>
+                            개발자 이메일
+                        </a>
+                    </div>
+                    <div class="card bg-gray-200 rounded-lg shadow-md p-2 flex items-center justify-center">
+                        <a href="https://kakao.com" class="flex items-center justify-center w-full text-gray-700" target="_blank" rel="noopener noreferrer">
+                            <i class="fa-solid fa-comment mr-2"></i>
+                            KAKAO
+                        </a>
+                    </div>
+                    <div class="card bg-gray-200 rounded-lg shadow-md p-2 flex items-center justify-center">
+                        <a href="https://apple.com" class="flex items-center justify-center w-full text-gray-700" target="_blank" rel="noopener noreferrer">
+                            <i class="fa-brands fa-apple mr-2"></i>
+                            APPLE
+                        </a>
+                    </div>
+                    <div class="card bg-gray-200 rounded-lg shadow-md p-2 flex items-center justify-center">
+                        <a href="https://google.com" class="flex items-center justify-center w-full text-gray-700" target="_blank" rel="noopener noreferrer">
+                            <i class="fa-brands fa-google mr-2"></i>
+                            GOOGLE
+                        </a>
+                    </div>
+                    <div class="mt-6 bg-gray-200 p-2 rounded-lg text-center">
+                        <p>반가워요! <strong>게스트 사용자</strong>님!!<br>디지털 명함 - 아이디탭을 <br> 방문해주셔서 감사합니다!</p>
+                    </div>
+                    <div class="mt-6 bg-gray-200 p-2 rounded-lg text-center">
+                            <h2 class="text-black text-2xl font-semibold">사용자 정보</h2>
+                            <p class="mt-2"><strong>사용자 닉네임:</strong> 게스트</p>
+                            <p><strong>이메일:</strong> 아직없음</p>
+                            <p><strong>가입날짜:</strong> [아이디탭 시작일]</p>
+                            <p><strong>사용자 상태:</strong> 게스트 사용자</p>
+                    
+                    </div>
+
+                </div>
+
+            </article>
+            
+        </div>
+        {% endif %}
+
+        <div class="nav flex justify-center rounded-lg shadow-sm mt-5">
+            {% if current_user.is_authenticated %}
+            <button type="button" class="py-2 px-3 inline-flex justify-center items-center gap-2 -ms-px first:rounded-s-lg first:ms-0 last:rounded-e-lg text-sm font-medium focus:z-10 border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-800 dark:focus:bg-neutral-800">
+                <a href="{{ url_for('main.dashboard') }}" class="text-blue-500 hover:text-blue-700">Dashboard</a>
+            </button>
+            <button type="button" class="py-2 px-3 inline-flex justify-center items-center gap-2 -ms-px first:rounded-s-lg first:ms-0 last:rounded-e-lg text-sm font-medium focus:z-10 border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-800 dark:focus:bg-neutral-800">
+                <a href="{{ url_for('main.logout') }}" class="text-blue-500 hover:text-blue-700">Logout</a>
+            </button>
+            {% else %}
+            <div class="flex justify-center ">
+                <button type="button" class="py-2 px-3 inline-flex justify-center items-center gap-2 -ms-px first:rounded-s-lg first:ms-0 last:rounded-e-lg text-sm font-medium focus:z-10 border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-800 dark:focus:bg-neutral-800">
+                    <a href="{{ url_for('main.login') }}" class="text-blue-500 hover:text-blue-700">로그인</a>
+                </button>
+                <button type="button" class="py-2 px-3 inline-flex justify-center items-center gap-2 -ms-px first:rounded-s-lg first:ms-0 last:rounded-e-lg text-sm font-medium focus:z-10 border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-800 dark:focus:bg-neutral-800">
+                    <a href="{{ url_for('main.register_user') }}" class="text-blue-500 hover:text-blue-700">회원가입</a>
+                </button>
+            </div>            
+            {% endif %}
+        </div>
+
+        <!-- 홈 화면 추가 버튼 -->
+        <div class="flex justify-center mt-5">
+            <button id="addToHomeScreen" class="bg-blue-500 text-white px-4 py-2 rounded">홈 화면에 추가</button>
+        </div>
+
+        <!-- 에이전트 상태 표시 -->
+        <div id="agentStatus" class="text-center mt-5 mb-4 text-gray-700"></div>
+    </div>
+
+    
+    <script>
+        // 모바일 여부 확인
+        const isMobile = /Mobi|Android/i.test(navigator.userAgent);
+        const agentStatus = document.getElementById("agentStatus");
+
+        // 에이전트 상태 표시
+        agentStatus.textContent = isMobile ? "현재 사용 중인 기기는 모바일입니다." : "현재 사용 중인 기기는 데스크톱입니다.";
+
+        // 모달 팝업 관련 스크립트
+        const modal = document.getElementById("myModal");
+        const btn = document.getElementById("addToHomeScreen");
+        const span = document.getElementsByClassName("close")[0];
+        const confirmAdd = document.getElementById("confirmAdd");
+
+        // 모바일인 경우에만 버튼 클릭 시 모달 열기
+        btn.onclick = function() {
+            if (isMobile) {
+                modal.style.display = "block";
+            } else {
+                alert("데스크톱에서는 홈 화면에 추가할 수 없습니다.");
+            }
+        }
+
+        // 모달 닫기
+        span.onclick = function() {
+            modal.style.display = "none";
+        }
+
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        }
+
+        // 홈 화면 추가 버튼 클릭 시
+        confirmAdd.onclick = function() {
+            // Android 및 iOS에 따라 홈 화면 추가 처리
+            if (window.matchMedia('(display-mode: standalone)').matches) {
+                // 이미 홈 화면에 추가된 경우
+                alert("이미 홈 화면에 추가되었습니다.");
+            } else {
+                // Android의 경우
+                if (window.navigator.standalone === false) {
+                    alert("안드로이드 기기에서 홈 화면에 추가하려면 브라우저 메뉴에서 '홈 화면에 추가'를 선택하세요.");
+                }
+                // iOS의 경우
+                else {
+                    alert("iOS 기기에서 홈 화면에 추가하려면 Safari 브라우저의 공유 버튼을 눌러 '홈 화면에 추가'를 선택하세요.");
+                }
+            }
+            modal.style.display = "none"; // 모달 닫기
+        }
+    </script>
+    <script>
+        const { element } = HSRemoveElement.getInstance('#remove-element', true);
+        const destroyBtn = document.querySelector('#dismiss-alert');
+
+        destroyBtn.addEventListener('click', () => {
+        element.destroy();
+        });
+    </script>
+</body>
+</html>
